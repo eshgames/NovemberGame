@@ -5,19 +5,27 @@ using UnityEngine;
 public class BreakAble : MonoBehaviour
 {
     public float fallSpeed;
-    Rigidbody2D rb;
+    private Rigidbody2D rb;
     bool startBreaking;
+    public float seconds;
+    private BoxCollider2D collide;
     private void Awake()
     {
-        fallSpeed = 5;
+        collide = GetComponent<BoxCollider2D>();
         rb = GetComponent<Rigidbody2D>();
         startBreaking = false;
     }
     // Update is called once per frame
     void Update()
     {
-        if(startBreaking)
-            transform.Translate(Vector2.down * fallSpeed*Time.deltaTime);
+
+        if (startBreaking)
+        {
+            transform.Translate(Vector2.down * fallSpeed * Time.deltaTime);
+            collide.enabled = false;
+            gameObject.layer = 0;
+        }
+            
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -26,7 +34,7 @@ public class BreakAble : MonoBehaviour
     }
     IEnumerator Break()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(seconds);
         startBreaking = true;
         
     }

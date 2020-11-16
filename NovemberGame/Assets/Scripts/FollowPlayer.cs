@@ -4,18 +4,30 @@ using UnityEngine;
 
 public class FollowPlayer : MonoBehaviour
 {
-    public GameObject player;
+    public Transform player;
     public Vector3 offset;
+    private Camera cam;
     // Start is called before the first frame update
+    private void Awake()
+    {
+        cam = Camera.main;
+        PlayerLife.PlayerDeath += OnPlayerDeath;
+    }
+    void OnPlayerDeath(object source,System.EventArgs e)
+    {   // Gets called when the player dies
+        //The function disables the script
+        Debug.Log("Camera disabled");
+        this.enabled = false;
+    }
     void Start()
     {
-
+        player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
-    // Update is called once per frame
-    private void LateUpdate()
+    private void FixedUpdate()
     {
-        //if (Camera.main.WorldToViewportPoint(background.GetComponent<SpriteRenderer>().bounds.extents).x > 1)
-        transform.position = new Vector3(player.transform.position.x - offset.x, transform.position.y, transform.position.z);// the intial position along the x axis
+        
+        transform.position = new Vector3(player.position.x, player.position.y, player.position.z - 10);
+            
     }
 }
