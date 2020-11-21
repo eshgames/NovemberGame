@@ -27,25 +27,37 @@ public class Player : MonoBehaviour
     [Header("Misc")]
     [SerializeField] LayerMask groundLayer;
 
+    private RaycastHit2D rotRay;  //A raycast to handle the player's rotations
+    private Vector2 normal;
+    private float angle;
+    private bool onSlider;
+    bool jump;
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        rotRay = Physics2D.Raycast(transform.position, Vector2.down, 10, groundLayer);
     }
 
     // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded || isSliding && Input.GetButtonDown("Jump"))
-            Jump();
+            jump = true;
+        
     }
 
     private void FixedUpdate()
     {
         xMovement = Input.GetAxis("Horizontal");
+        rotRay = Physics2D.Raycast(transform.position, Vector2.down, 10, groundLayer);
+        normal = rotRay.normal;
+        angle = Mathf.Atan2(rotRay.normal.x, rotRay.normal.y) * Mathf.Rad2Deg;  // The angle of the plain the player currently stands on
         CheckGround();        
         Flip();
         Movement();
+        if (jump)
+            Jump();
         WallJump();
     }
 
@@ -65,7 +77,14 @@ public class Player : MonoBehaviour
 
     void Jump()
     {
-        rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
+        jump = false;
+        if(!onSlider)
+            rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
+        else
+        {
+            rb.velocity = jumpSpeed * (new Vector2(normal.x, normal.y));
+        }
+
     }
 
     void Flip()
@@ -85,7 +104,16 @@ public class Player : MonoBehaviour
 
     void Movement()
     {
-        rb.velocity = new Vector2(xMovement * moveSpeed, rb.velocity.y);
+        if(!onSlider)
+            rb.velocity = new Vector2(xMovement * moveSpeed, rb.velocity.y);
+        else if(onSlider)
+        {
+
+            // the angle of the slide
+            float xV = Mathf.Cos(angle * Mathf.Deg2Rad);
+            float yV = Mathf.Sin(angle * Mathf.Deg2Rad);
+            rb.velocity = new Vector2(xMovement * moveSpeed, rb.velocity.y) + new Vector2(xV * moveSpeed , yV * Mathf.Sign(rb.velocity.y) * moveSpeed );
+        }
     }
 
     void WallJump()
@@ -114,5 +142,33 @@ public class Player : MonoBehaviour
         {
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, slideSpeed, float.MaxValue));
         }
+    }
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.collider.tag.Equals("Slider"))
+        {
+            onSlider = false;
+        }
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+
+        if (collision.collider.tag.Equals("Slider"))
+            onSlider = true;
+    }
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.collider.tag.Equals("Slider"))  // do with switch
+        {
+            if (rotRay.collider != null)
+                transform.eulerAngles = Mathf.Sign(rotRay.collider.transform.rotation.z) * Vector3.forward * angle;
+            //transform.eulerAngles = new Vector3(0, 0, collision.collider.gameObject.transform.rotation.eulerAngles.z);  // rotating the player when on the slide
+        }
+        else
+        {
+            transform.eulerAngles = new Vector3(0, 0, 0);  // rotating back to normal rotation when not on the slide.
+            //rb.velocity = Vector2.zero;
+        }
+
     }
 }

@@ -6,7 +6,7 @@ public class BreakAble : MonoBehaviour
 {
     public float fallSpeed;
     private Rigidbody2D rb;
-    bool startBreaking;
+    private bool startBreaking;
     public float seconds;
     private BoxCollider2D collide;
     private void Awake()
@@ -36,6 +36,8 @@ public class BreakAble : MonoBehaviour
     {
         yield return new WaitForSeconds(seconds);
         startBreaking = true;
-        
+        yield return new WaitForSeconds(2.5f);
+        Destroy(gameObject);
+
     }
 }
