@@ -15,7 +15,7 @@ public class PlayerLife : MonoBehaviour
     {  //Invokes the playerdeath event
         PlayerDeath?.Invoke(typeof(PlayerLife),System.EventArgs.Empty);
     }
-    public virtual void OnDeath(object source, System.EventArgs e)
+    public void OnDeath(object source, System.EventArgs e)
     {   // Gets called when the player dies somehow
         // Starts the death animation of the player and destroys the gameobject of the player
         //Start death animation

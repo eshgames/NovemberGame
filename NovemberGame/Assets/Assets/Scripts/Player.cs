@@ -112,7 +112,8 @@ public class Player : MonoBehaviour
             // the angle of the slide
             float xV = Mathf.Cos(angle * Mathf.Deg2Rad);
             float yV = Mathf.Sin(angle * Mathf.Deg2Rad);
-            rb.velocity = new Vector2(xMovement * moveSpeed, rb.velocity.y) + new Vector2(xV * moveSpeed , yV * Mathf.Sign(rb.velocity.y) * moveSpeed );
+            //rb.velocity = new Vector2( 0, 0) + new Vector2( moveSpeed ,   Mathf.Sign(rb.velocity.y) * moveSpeed );
+            rb.AddForce(new Vector2( xV *moveSpeed, Mathf.Sign(rb.velocity.y) * moveSpeed * yV));
         }
     }
 
@@ -158,8 +159,10 @@ public class Player : MonoBehaviour
     }
     private void OnCollisionStay2D(Collision2D collision)
     {
+
         if (collision.collider.tag.Equals("Slider"))  // do with switch
         {
+            onSlider = true;
             if (rotRay.collider != null)
                 transform.eulerAngles = Mathf.Sign(rotRay.collider.transform.rotation.z) * Vector3.forward * angle;
             //transform.eulerAngles = new Vector3(0, 0, collision.collider.gameObject.transform.rotation.eulerAngles.z);  // rotating the player when on the slide
